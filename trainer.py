@@ -11,13 +11,13 @@ logging.basicConfig(
     stream=sys.stdout
 )
 
-ENVIRONMENT_BINARY = os.environ['DRLUD_P2_ENV']
+ENVIRONMENT_BINARY = os.environ['DRLUD_P2_V1_ENV']
 path_prefix = "./hp_search_results/"
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(agent, environment, n_episodes=2000, max_t=1000, store_weights_to="checkpoint.pth"):
+def train(agent, environment, n_episodes=2000, max_t=2000, solution_score=100.0, store_weights_to="checkpoint.pth"):
     scores = []  # list containing scores from each episode
     for i_episode in range(1, n_episodes + 1):
         env_info = environment.reset(train_mode=True)[agent.name]
@@ -31,16 +31,16 @@ def train(agent, environment, n_episodes=2000, max_t=1000, store_weights_to="che
             done = env_info.local_done
             agent.step(state, action, reward, next_state, done)
             state = next_state
-            score.append(reward)
+            score.append(sum(reward))
             if all(done):
                 break
 
-        scores.append(score)
+        scores.append(sum(score))
 
         last_100_steps_mean = np.mean(scores[-100:])
-        print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, last_100_steps_mean), end="")
+        print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}\tEnded in {} steps'.format(i_episode, last_100_steps_mean, scores[-1], t), end="")
         if i_episode % 100 == 0:
-            print('\rEpisode {}\tAverage Score: {:.2f}'.format(i_episode, last_100_steps_mean))
+            print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}\tEnded in {} steps'.format(i_episode, last_100_steps_mean, scores[-1], t))
 
         torch.save(agent.actor_local.state_dict(), store_weights_to.replace("eps", str(n_episodes)).replace("role", "actor"))
         torch.save(agent.critic_local.state_dict(), store_weights_to.replace("eps", str(n_episodes)).replace("role", "critic"))
@@ -69,7 +69,10 @@ algorithm_factories = {
 
 
 simulation_hyperparameter_reference = {
-    1:   ac_parm(-1, -1, int(1e5), "", 128, 0.99, 1e-3, 1e-4, 1e-3, 0, 1, "relu", None, None),
+    2:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-3, 0, 1, "relu", None, None),
+    3:   ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-3, 0, 1, "relu", None, None),
+    4:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 2e-4, 1e-3, 0, 1, "relu", None, None),
+    5:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 5e-5, 1e-3, 0, 1, "relu", None, None)
 }
 
 def run_training_session(agent_factory, agent_config: ac_parm, id):

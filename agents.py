@@ -67,7 +67,8 @@ class Agent():
     def step(self, state, action, reward, next_state, done):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
-        self.memory.add(state, action, reward, next_state, done)
+        for (s, a, r, ns, d) in zip(state, action, reward, next_state, done):
+            self.memory.add(s, a, r, ns, d)
 
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.config.batch_size:
@@ -105,11 +106,11 @@ class Agent():
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
         actions_next = self.actor_target(next_states)
-        Q_targets_next = self.critic_target(next_states, actions_next).view([rewards.size()[0], -1])
+        Q_targets_next = self.critic_target(next_states, actions_next)
         # Compute Q targets for current states (y_i)
         Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
         # Compute critic loss
-        Q_expected = self.critic_local(states, actions).view([rewards.size()[0], -1])
+        Q_expected = self.critic_local(states, actions)
         critic_loss = F.mse_loss(Q_expected, Q_targets)
         # Minimize the loss
         self.critic_optimizer.zero_grad()

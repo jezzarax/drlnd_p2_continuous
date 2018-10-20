@@ -70,21 +70,25 @@ class Agent():
         for (s, a, r, ns, d) in zip(state, action, reward, next_state, done):
             self.memory.add(s, a, r, ns, d)
 
+
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.config.batch_size:
             experiences = self.memory.sample()
             self.learn(experiences, self.config.gamma)
 
-    def act(self, state, add_noise=True):
+    def act(self, state, add_noise=False):
         """Returns actions for given state as per current policy."""
-        state = torch.from_numpy(state).float().to(self.device)
+        states = torch.from_numpy(state).float().to(self.device)
+        actions = np.zeros((state.shape[0], self.config.action_size))
         self.actor_local.eval()
         with torch.no_grad():
-            action = self.actor_local(state).cpu().data.numpy()
+            for agent_num, state in enumerate(states):
+                action = self.actor_local(state).cpu().data.numpy()
+                actions[agent_num, :] = action
         self.actor_local.train()
         if add_noise:
-            action += self.noise.sample()
-        return np.clip(action, -1, 1)
+            actions += self.noise.sample()
+        return np.clip(actions, -1, 1)
 
     def reset(self):
         self.noise.reset()

@@ -17,30 +17,29 @@ path_prefix = "./hp_search_results/"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(agent, environment, n_episodes=2000, max_t=2000, solution_score=100.0, store_weights_to="checkpoint.pth"):
+def train(agent, environment, n_episodes=150, max_t=2000, store_weights_to="checkpoint.pth"):
     scores = []  # list containing scores from each episode
     for i_episode in range(1, n_episodes + 1):
         env_info = environment.reset(train_mode=True)[agent.name]
-        state = env_info.vector_observations
-        score = []
+        states = env_info.vector_observations
+        episode_scores = []
         for t in range(max_t):
-            action = agent.act(state)
-            env_info = environment.step(action)[agent.name]
-            next_state = env_info.vector_observations
-            reward = env_info.rewards
-            done = env_info.local_done
-            agent.step(state, action, reward, next_state, done)
-            state = next_state
-            score.append(sum(reward))
-            if all(done):
+            actions = agent.act(states)
+            env_info = environment.step(actions)[agent.name]
+            next_states = env_info.vector_observations
+            rewards = env_info.rewards
+            dones = env_info.local_done
+            agent.step(states, actions, rewards, next_states, dones)
+            states = next_states
+            episode_scores.append(sum(rewards))
+            if all(dones):
                 break
 
-        scores.append(sum(score))
-
+        scores.append(sum(episode_scores))
         last_100_steps_mean = np.mean(scores[-100:])
-        print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}\tEnded in {} steps'.format(i_episode, last_100_steps_mean, scores[-1], t), end="")
-        if i_episode % 100 == 0:
-            print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}\tEnded in {} steps'.format(i_episode, last_100_steps_mean, scores[-1], t))
+        print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}\tEnded in {} steps'.format(i_episode, last_100_steps_mean, np.mean(scores[-1]), t), end="")
+        if i_episode % 10 == 0:
+            print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}\tEnded in {} steps'.format(i_episode, last_100_steps_mean, np.mean(scores[-1]), t))
 
         torch.save(agent.actor_local.state_dict(), store_weights_to.replace("eps", str(n_episodes)).replace("role", "actor"))
         torch.save(agent.critic_local.state_dict(), store_weights_to.replace("eps", str(n_episodes)).replace("role", "critic"))
@@ -69,10 +68,21 @@ algorithm_factories = {
 
 
 simulation_hyperparameter_reference = {
-    2:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-3, 0, 1, "relu", None, None),
-    3:   ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-3, 0, 1, "relu", None, None),
-    4:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 2e-4, 1e-3, 0, 1, "relu", None, None),
-    5:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 5e-5, 1e-3, 0, 1, "relu", None, None)
+    1:    ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
+    10:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
+    11:   ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
+    12:   ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
+    13:   ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
+    20:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0, 1, "relu", None, None),
+    21:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0, 1, "relu", None, None),
+    22:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0, 1, "relu", None, None),
+    23:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 8e-4, 0, 1, "relu", None, None),
+    30:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 2e-4, 1e-4, 0, 1, "relu", None, None),
+    31:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 4e-4, 1e-4, 0, 1, "relu", None, None),
+    32:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 8e-4, 1e-4, 0, 1, "relu", None, None),
+    33:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 1e-4, 0, 1, "relu", None, None),
+    34:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 5e-5, 0, 1, "relu", None, None),
+    35:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 8e-4, 8e-4, 0, 1, "relu", None, None),
 }
 
 def run_training_session(agent_factory, agent_config: ac_parm, id):

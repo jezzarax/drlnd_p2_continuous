@@ -11,13 +11,13 @@ logging.basicConfig(
     stream=sys.stdout
 )
 
-ENVIRONMENT_BINARY = os.environ['DRLUD_P2_V1_ENV']
+ENVIRONMENT_BINARY = os.environ['DRLUD_P2_V2_ENV']
 path_prefix = "./hp_search_results/"
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def train(agent, environment, n_episodes=150, max_t=2000, store_weights_to="checkpoint.pth"):
+def train(agent, environment, n_episodes=1000, max_t=2000, store_weights_to="checkpoint.pth"):
     scores = []  # list containing scores from each episode
     for i_episode in range(1, n_episodes + 1):
         env_info = environment.reset(train_mode=True)[agent.name]
@@ -72,7 +72,7 @@ simulation_hyperparameter_reference = {
     10:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
     11:   ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
     12:   ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    13:   ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
+    13:   ac_parm(-1, -1, int(1e5), "", 512,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
     20:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0, 1, "relu", None, None),
     21:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0, 1, "relu", None, None),
     22:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0, 1, "relu", None, None),

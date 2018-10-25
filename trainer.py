@@ -12,7 +12,7 @@ logging.basicConfig(
 )
 
 ENVIRONMENT_BINARY = os.environ['DRLUD_P2_V2_ENV']
-path_prefix = "./hp_search_results/"
+path_prefix = "./hp_single_agent_search_results/"
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -68,25 +68,30 @@ algorithm_factories = {
 
 
 simulation_hyperparameter_reference = {
-    1:    ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    10:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    11:   ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    12:   ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    13:   ac_parm(-1, -1, int(1e5), "", 512,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    14:   ac_parm(-1, -1, int(1e5), "", 384,  0.99, 1e-3, 1e-4, 1e-4, 0, 1, "relu", None, None),
-    20:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0, 1, "relu", None, None),
-    21:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0, 1, "relu", None, None),
-    22:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0, 1, "relu", None, None),
-    23:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 8e-4, 0, 1, "relu", None, None),
-    24:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-5, 0, 1, "relu", None, None),
-    25:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-5, 0, 1, "relu", None, None),
-    30:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 2e-4, 1e-4, 0, 1, "relu", None, None),
-    31:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 4e-4, 1e-4, 0, 1, "relu", None, None),
-    32:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 7e-5, 1e-4, 0, 1, "relu", None, None),
-    33:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 1e-4, 0, 1, "relu", None, None),
-    34:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-4, 0, 1, "relu", None, None),
-    35:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 5e-5, 0, 1, "relu", None, None),
-    36:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-5, 0, 1, "relu", None, None),
+    1:    ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, "relu", None, None),
+    2:    ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, "relu", None, None),
+    10:   ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, "relu", None, None),
+    11:   ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, "relu", None, None),
+    12:   ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, "relu", None, None),
+    13:   ac_parm(-1, -1, int(1e5), "", 512,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, "relu", None, None),
+    14:   ac_parm(-1, -1, int(1e5), "", 384,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, "relu", None, None),
+    20:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0,    1, "relu", None, None),
+    21:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0,    1, "relu", None, None),
+    22:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0,    1, "relu", None, None),
+    23:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 8e-4, 0,    1, "relu", None, None),
+    24:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-5, 0,    1, "relu", None, None),
+    25:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-5, 0,    1, "relu", None, None),
+    30:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 2e-4, 1e-4, 0,    1, "relu", None, None),
+    31:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 4e-4, 1e-4, 0,    1, "relu", None, None),
+    32:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 7e-5, 1e-4, 0,    1, "relu", None, None),
+    33:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 1e-4, 0,    1, "relu", None, None),
+    34:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-4, 0,    1, "relu", None, None),
+    35:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 5e-5, 0,    1, "relu", None, None),
+    36:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-5, 0,    1, "relu", None, None),
+    40:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-3, 1, "relu", None, None),
+    41:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-2, 1, "relu", None, None),
+    42:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-3, 1, "relu", None, None),
+    40:   ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-4, 1, "relu", None, None),
 }
 
 def run_training_session(agent_factory, agent_config: ac_parm, id):

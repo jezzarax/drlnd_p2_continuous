@@ -22,7 +22,9 @@ ac_parm = namedtuple("ac_parm", [
     "lr_critic",
     "weight_decay",
     "times",
-    "noise_enabled"
+    "noise_enabled",
+    "gradient_clipping",
+    "learn_every"
 ])
 
 
@@ -59,15 +61,18 @@ class Agent:
 
         # Replay memory
         self.memory = ReplayBuffer(config, device, random_seed)
+
+        self.step_number = 0
     
     def step(self, state, action, reward, next_state, done):
         """Save experience in replay memory, and use random sample from buffer to learn."""
         # Save experience / reward
+        self.step_number += 1
         for (s, a, r, ns, d) in zip(state, action, reward, next_state, done):
             self.memory.add(s, a, r, ns, d)
 
         # Learn, if enough samples are available in memory
-        if len(self.memory) > self.config.batch_size:
+        if len(self.memory) > self.config.batch_size and self.step_number % self.config.learn_every == 0:
             experiences = self.memory.sample()
             self.learn(experiences, self.config.gamma)
 
@@ -114,6 +119,8 @@ class Agent:
         # Minimize the loss
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
+        if self.config.gradient_clipping:
+            torch.nn.utils.clip_grad_norm(self.critic_local.parameters(), 1)
         self.critic_optimizer.step()
 
         # ---------------------------- update actor ---------------------------- #

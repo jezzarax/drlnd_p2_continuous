@@ -15,9 +15,10 @@ logging.basicConfig(
 )
 
 ENVIRONMENT_BINARY = os.environ['DRLUD_P2_V2_ENV']
-path_prefix = "./hp_single_agent_search_results/"
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+path_prefix = "./hp_multi_agent_search_results/" if torch.cuda.is_available() else "./hp_single_agent_search_results/"
 
 
 def train(agent, environment, n_episodes=1000, max_t=2000, store_weights_to="checkpoint.pth"):
@@ -34,7 +35,7 @@ def train(agent, environment, n_episodes=1000, max_t=2000, store_weights_to="che
             dones = env_info.local_done
             agent.step(states, actions, rewards, next_states, dones)
             states = next_states
-            episode_scores.append(sum(rewards))
+            episode_scores.append(sum(rewards)/len(rewards))
             if all(dones):
                 break
 
@@ -79,62 +80,65 @@ algorithm_factories = {
 }
 
 simulation_hyperparameter_reference = {
-    1:  ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    2:  ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False),
-    10: ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    11: ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    12: ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    13: ac_parm(-1, -1, int(1e5), "", 512,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    14: ac_parm(-1, -1, int(1e5), "", 384,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    20: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0,    1, False),
-    21: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0,    1, False),
-    22: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0,    1, False),
-    23: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 8e-4, 0,    1, False),
-    24: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-5, 0,    1, False),
-    25: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-5, 0,    1, False),
-    30: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 2e-4, 1e-4, 0,    1, False),
-    31: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 4e-4, 1e-4, 0,    1, False),
-    32: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 7e-5, 1e-4, 0,    1, False),
-    33: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 1e-4, 0,    1, False),
-    34: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-4, 0,    1, False),
-    35: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 5e-5, 0,    1, False),
-    36: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-5, 0,    1, False),
-    40: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-3, 1, False),
-    41: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-2, 1, False),
-    42: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-3, 1, False),
-    43: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-4, 1, False),
+    1:  ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    2:  ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False, 1),
+    10: ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    11: ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    12: ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    13: ac_parm(-1, -1, int(1e5), "", 512,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    14: ac_parm(-1, -1, int(1e5), "", 384,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    20: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0,    1, False, False, 1),
+    21: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0,    1, False, False, 1),
+    22: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0,    1, False, False, 1),
+    23: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 8e-4, 0,    1, False, False, 1),
+    24: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-5, 0,    1, False, False, 1),
+    25: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-5, 0,    1, False, False, 1),
+    30: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 2e-4, 1e-4, 0,    1, False, False, 1),
+    31: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 4e-4, 1e-4, 0,    1, False, False, 1),
+    32: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 7e-5, 1e-4, 0,    1, False, False, 1),
+    33: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 1e-4, 0,    1, False, False, 1),
+    34: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-4, 0,    1, False, False, 1),
+    35: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 5e-5, 0,    1, False, False, 1),
+    36: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-5, 0,    1, False, False, 1),
+    40: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-3, 1, False, False, 1),
+    41: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-2, 1, False, False, 1),
+    42: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-3, 1, False, False, 1),
+    43: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-4, 1, False, False, 1),
 
-    50: ac_parm(-1, -1, int(1e6), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    51: ac_parm(-1, -1, int(1e6), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    52: ac_parm(-1, -1, int(1e7), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    53: ac_parm(-1, -1, int(1e7), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    54: ac_parm(-1, -1, int(1e8), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
-    55: ac_parm(-1, -1, int(1e8), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False),
+    # Large sized memory to check for stability effect
+    50: ac_parm(-1, -1, int(1e6), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    51: ac_parm(-1, -1, int(1e6), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    52: ac_parm(-1, -1, int(1e7), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    53: ac_parm(-1, -1, int(1e7), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    55: ac_parm(-1, -1, int(1e8), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    56: ac_parm(-1, -1, int(1e8), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
+    57: ac_parm(-1, -1, int(1e8), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1),
 
-    101: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, True),
-    102: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, True),
-    110: ac_parm(-1, -1, int(1e5), "", 128,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, True),
-    111: ac_parm(-1, -1, int(1e5), "", 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, True),
-    112: ac_parm(-1, -1, int(1e5), "", 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, True),
-    113: ac_parm(-1, -1, int(1e5), "", 512,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, True),
-    114: ac_parm(-1, -1, int(1e5), "", 384,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, True),
-    120: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-4, 0,    1, True),
-    121: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 4e-4, 0,    1, True),
-    122: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 5e-5, 0,    1, True),
-    123: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 8e-4, 0,    1, True),
-    124: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-5, 0,    1, True),
-    125: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 2e-5, 0,    1, True),
-    130: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 2e-4, 1e-4, 0,    1, True),
-    131: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 4e-4, 1e-4, 0,    1, True),
-    132: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 7e-5, 1e-4, 0,    1, True),
-    133: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 1e-4, 0,    1, True),
-    134: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-4, 0,    1, True),
-    135: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 5e-5, 5e-5, 0,    1, True),
-    136: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-5, 1e-5, 0,    1, True),
-    140: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-3, 1, True),
-    141: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-2, 1, True),
-    142: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-3, 1, True),
-    143: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-4, 1, True),
+    # Check the effect of gradient clipping on the overall stability
+    60: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, True, 1),
+    61: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, True, 1),
+    62: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, True, 1),
+    63: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, True, 1),
+
+    # Check the effect of decreasing of the density of learning sessions over time
+    70: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False,  2),
+    71: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False,  2),
+    72: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, False,  2),
+    73: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, False,  2),
+    74: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False,  5),
+    75: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False,  5),
+    76: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, False,  5),
+    77: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, False,  5),
+    78: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 20),
+    79: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False, 20),
+    80: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, False, 20),
+    81: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, False, 20),
+
+    # Check for general stability of outcomes over multiple runs with various random seed
+    90: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,   25, False, False, 1),
+    91: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,   25, False, False, 1),
+    92: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-4, 0,   25,  True, False, 1),
+    93: ac_parm(-1, -1, int(1e5), "", 256,  0.99, 1e-3, 1e-4, 1e-3, 0,   25,  True, False, 1),
 }
 
 
@@ -142,6 +146,7 @@ def run_training_session(agent_factory, agent_config: ac_parm, id):
     env = prepare_environment()
     (brain_name, num_agents, action_size, state_size) = infer_environment_properties(env)
     agent_config = agent_config._replace(action_size=action_size, state_size=state_size, name=brain_name)
+
     scores = []
     for seed in range(agent_config.times):
         agent = agent_factory(agent_config, seed)

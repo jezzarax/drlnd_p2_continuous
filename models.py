@@ -4,15 +4,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 def hidden_init(layer):
     fan_in = layer.weight.data.size()[0]
     lim = 1. / np.sqrt(fan_in)
-    return (-lim, lim)
+    return -lim, lim
+
 
 class Actor(nn.Module):
     """Actor (Policy) Model."""
 
-    def __init__(self, config, seed, fc1_units=128, fc2_units=64):
+    def __init__(self, config, seed, fc1_units=400, fc2_units=300):
         """Initialize parameters and build model.
         Params
         ======

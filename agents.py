@@ -10,7 +10,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 
-
 ac_parm = namedtuple("ac_parm", [
     "state_size",
     "action_size",
@@ -23,15 +22,11 @@ ac_parm = namedtuple("ac_parm", [
     "lr_critic",
     "weight_decay",
     "times",
-    "nonlinearity",
-    "actornet",
-    "criticnet"
+    "noise_enabled"
 ])
 
 
-
-
-class Agent():
+class Agent:
     """Interacts with and learns from the environment."""
     
     def __init__(self, config: ac_parm, device, random_seed):
@@ -56,7 +51,8 @@ class Agent():
         # Critic Network (w/ Target Network)
         self.critic_local = Critic(config, random_seed).to(device)
         self.critic_target = Critic(config, random_seed).to(device)
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=config.lr_critic, weight_decay=config.weight_decay)
+        self.critic_optimizer = optim.Adam(
+            self.critic_local.parameters(), lr=config.lr_critic, weight_decay=config.weight_decay)
 
         # Noise process
         self.noise = OUNoise(config.action_size, random_seed)
@@ -70,13 +66,12 @@ class Agent():
         for (s, a, r, ns, d) in zip(state, action, reward, next_state, done):
             self.memory.add(s, a, r, ns, d)
 
-
         # Learn, if enough samples are available in memory
         if len(self.memory) > self.config.batch_size:
             experiences = self.memory.sample()
             self.learn(experiences, self.config.gamma)
 
-    def act(self, state, add_noise=False):
+    def act(self, state):
         """Returns actions for given state as per current policy."""
         states = torch.from_numpy(state).float().to(self.device)
         actions = np.zeros((state.shape[0], self.config.action_size))
@@ -86,7 +81,7 @@ class Agent():
                 action = self.actor_local(state).cpu().data.numpy()
                 actions[agent_num, :] = action
         self.actor_local.train()
-        if add_noise:
+        if self.config.noise_enabled:
             actions += self.noise.sample()
         return np.clip(actions, -1, 1)
 
@@ -147,6 +142,7 @@ class Agent():
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)
 
+
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
@@ -157,6 +153,7 @@ class OUNoise:
         self.sigma = sigma
         self.seed = random.seed(seed)
         self.reset()
+        self.state = copy.copy(self.mu)
 
     def reset(self):
         """Reset the internal state (= noise) to mean (mu)."""
@@ -165,9 +162,10 @@ class OUNoise:
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for i in range(len(x))])
+        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for _ in range(len(x))])
         self.state = x + dx
         return self.state
+
 
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
@@ -202,7 +200,7 @@ class ReplayBuffer:
         next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(self.device)
         dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(self.device)
 
-        return (states, actions, rewards, next_states, dones)
+        return states, actions, rewards, next_states, dones
 
     def __len__(self):
         """Return the current size of internal memory."""

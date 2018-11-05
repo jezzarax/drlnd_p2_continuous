@@ -25,7 +25,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 path_prefix = "./hp_multi_agent_search_results/" if torch.cuda.is_available() else "./hp_single_agent_search_results/"
 
 
-def train(agent, environment, n_episodes=500, max_t=2000, store_weights_to="checkpoint.pth"):
+def train(agent, environment, n_episodes=1000, max_t=2000, store_weights_to="checkpoint.pth"):
     scores = []  # list containing scores from each episode
     for i_episode in range(1, n_episodes + 1):
         env_info = environment.reset(train_mode=True)[agent.name]
@@ -48,7 +48,7 @@ def train(agent, environment, n_episodes=500, max_t=2000, store_weights_to="chec
         print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}'.format(i_episode,
                                                                                last_100_steps_mean,
                                                                                np.mean(scores[-1])), end="")
-        if i_episode % 10 == 0:
+        if i_episode % 20 == 0:
             print('\rEpisode {}\tAverage Score: {:.2f}\tLast score: {:.2f}'.format(i_episode,
                                                                                    last_100_steps_mean,
                                                                                    np.mean(scores[-1])))
@@ -73,7 +73,6 @@ def infer_environment_properties(environment):
     states = env_info.vector_observations
     state_size = states.shape[1]
     return brain_name, num_agents, action_size, state_size
-
 
 
 def prepare_ddpg_agent(agent_config: ddpg_parm, env_parm: env_parm, seed):

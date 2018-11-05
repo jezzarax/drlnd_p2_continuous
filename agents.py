@@ -3,35 +3,31 @@ import random
 import copy
 from collections import namedtuple, deque
 
-from models import Actor, Critic
+from models import Actor, Critic, PPOModule
 
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
 
-ac_parm = namedtuple("ac_parm", [
-    "state_size",
-    "action_size",
+ddpg_parm = namedtuple("ddpg_parm", [
     "memory_size",
-    "name",
     "batch_size",
     "gamma",
     "tau",
     "lr_actor",
     "lr_critic",
     "weight_decay",
-    "times",
     "noise_enabled",
     "gradient_clipping",
     "learn_every"
 ])
 
 
-class Agent:
+class DDPGAgent:
     """Interacts with and learns from the environment."""
     
-    def __init__(self, config: ac_parm, device, random_seed):
+    def __init__(self, config: ddpg_parm, env_parm, device, random_seed):
         """Initialize an Agent object.
         
         Params
@@ -41,26 +37,27 @@ class Agent:
             random_seed (int): random seed
         """
         self.config = config
+        self.env_parm = env_parm
         self.seed = random.seed(random_seed)
-        self.name = config.name
+        self.name = env_parm.brain_name
         self.device = device
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(config, random_seed).to(device)
-        self.actor_target = Actor(config, random_seed).to(device)
+        self.actor_local = Actor(env_parm, random_seed).to(device)
+        self.actor_target = Actor(env_parm, random_seed).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=config.lr_actor)
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Critic(config, random_seed).to(device)
-        self.critic_target = Critic(config, random_seed).to(device)
+        self.critic_local = Critic(env_parm, random_seed).to(device)
+        self.critic_target = Critic(env_parm, random_seed).to(device)
         self.critic_optimizer = optim.Adam(
             self.critic_local.parameters(), lr=config.lr_critic, weight_decay=config.weight_decay)
 
         # Noise process
-        self.noise = OUNoise(config.action_size, random_seed)
+        self.noise = OUNoise(env_parm.action_size, random_seed)
 
         # Replay memory
-        self.memory = ReplayBuffer(config, device, random_seed)
+        self.memory = ReplayBuffer(config, env_parm, device, random_seed)
 
         self.step_number = 0
     
@@ -79,7 +76,7 @@ class Agent:
     def act(self, state):
         """Returns actions for given state as per current policy."""
         states = torch.from_numpy(state).float().to(self.device)
-        actions = np.zeros((state.shape[0], self.config.action_size))
+        actions = np.zeros((state.shape[0], self.env_parm.action_size))
         self.actor_local.eval()
         with torch.no_grad():
             for agent_num, state in enumerate(states):
@@ -177,7 +174,7 @@ class OUNoise:
 class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
 
-    def __init__(self, config, device, seed):
+    def __init__(self, agent_config, env_config, device, seed):
         """Initialize a ReplayBuffer object.
         Params
         ======
@@ -185,9 +182,9 @@ class ReplayBuffer:
             batch_size (int): size of each training batch
         """
 
-        self.action_size = config.action_size
-        self.memory = deque(maxlen=config.memory_size)  # internal memory (deque)
-        self.batch_size = config.batch_size
+        self.action_size = env_config.action_size
+        self.memory = deque(maxlen=agent_config.memory_size)  # internal memory (deque)
+        self.batch_size = agent_config.batch_size
         self.device = device
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         self.seed = random.seed(seed)
@@ -212,3 +209,84 @@ class ReplayBuffer:
     def __len__(self):
         """Return the current size of internal memory."""
         return len(self.memory)
+
+
+ppo_parm = namedtuple("ppo_parm", [
+    "fc1_units", "fc2_units", "discount_rate", "epsilon", "beta", "tmax", "sgd_epochs"
+])
+
+class PPOAgent():
+
+    def __init__(self, config: ddpg_parm, env_parm, device, random_seed):
+        self.config = config
+        self.env_parm = env_parm
+        self.seed = random.seed(random_seed)
+        self.name = env_parm.brain_name
+        self.device = device
+
+        self.model = PPOModule(config, random_seed)
+
+        self.step_number = 0
+
+    def states_to_prob(self, states):
+        states = torch.stack(states)
+        policy_input = states.view(-1, *states.shape[-3:])
+        return self.model(policy_input).view(states.shape[:-3])
+
+    def clipped_surrogate(self, policy, old_probs, states, actions, rewards,
+                          discount=0.995,
+                          epsilon=0.1, beta=0.01):
+
+        discount = discount ** np.arange(len(rewards))
+        rewards = np.asarray(rewards) * discount[:, np.newaxis]
+
+        # convert rewards to future rewards
+        rewards_future = rewards[::-1].cumsum(axis=0)[::-1]
+
+        mean = np.mean(rewards_future, axis=1)
+        std = np.std(rewards_future, axis=1) + 1.0e-10
+
+        rewards_normalized = (rewards_future - mean[:, np.newaxis]) / std[:, np.newaxis]
+
+        # convert everything into pytorch tensors and move to gpu if available
+        actions = torch.tensor(actions, dtype=torch.int8, device=self.device)
+        old_probs = torch.tensor(old_probs, dtype=torch.float, device=self.device)
+        rewards = torch.tensor(rewards_normalized, dtype=torch.float, device=self.device)
+
+        # convert states to policy (or probability)
+        new_probs = self.states_to_prob(states)
+        new_probs = torch.where(actions == RIGHT, new_probs, 1.0 - new_probs)
+
+        # ratio for clipping
+        ratio = new_probs / old_probs
+
+        # clipped function
+        clip = torch.clamp(ratio, 1 - epsilon, 1 + epsilon)
+        clipped_surrogate = torch.min(ratio * rewards, clip * rewards)
+
+        # include a regularization term
+        # this steers new_policy towards 0.5
+        # add in 1.e-10 to avoid log(0) which gives nan
+        entropy = -(new_probs * torch.log(old_probs + 1.e-10) + \
+                    (1.0 - new_probs) * torch.log(1.0 - old_probs + 1.e-10))
+
+        # this returns an average of all the entries of the tensor
+        # effective computing L_sur^clip / T
+        # averaged over time-step and number of trajectories
+        # this is desirable because we have normalized our rewards
+        return torch.mean(clipped_surrogate + beta * entropy)
+
+    def act(self):
+        pass
+
+    def step(self, state, action, reward, next_state, done):
+        """Save experience in replay memory, and use random sample from buffer to learn."""
+        # Save experience / reward
+        self.step_number += 1
+        for (s, a, r, ns, d) in zip(state, action, reward, next_state, done):
+            self.memory.add(s, a, r, ns, d)
+
+        # Learn, if enough samples are available in memory
+        if len(self.memory) > self.config.batch_size and self.step_number % self.config.learn_every == 0:
+            experiences = self.memory.sample()
+            self.learn(experiences, self.config.gamma)

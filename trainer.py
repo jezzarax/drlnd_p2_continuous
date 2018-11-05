@@ -84,32 +84,67 @@ algorithm_factories = {
     "ddpg": prepare_ddpg_agent
 }
 
+
 simulation_hyperparameter_reference = {
+    1:  launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, True,  1)),
+    2:  launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False, 1)),
+    10: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 128,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    11: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    12: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    13: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 512,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    14: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 384,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    20: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 2e-4, 0,    1, False, False, 1)),
+    21: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 4e-4, 0,    1, False, False, 1)),
+    22: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 5e-5, 0,    1, False, False, 1)),
+    23: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 8e-4, 0,    1, False, False, 1)),
+    24: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-5, 0,    1, False, False, 1)),
+    25: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 2e-5, 0,    1, False, False, 1)),
+    30: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 2e-4, 1e-4, 0,    1, False, False, 1)),
+    31: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 4e-4, 1e-4, 0,    1, False, False, 1)),
+    32: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 7e-5, 1e-4, 0,    1, False, False, 1)),
+    33: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 5e-5, 1e-4, 0,    1, False, False, 1)),
+    34: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-5, 1e-4, 0,    1, False, False, 1)),
+    35: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 5e-5, 5e-5, 0,    1, False, False, 1)),
+    36: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-5, 1e-5, 0,    1, False, False, 1)),
+    40: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-3, 1, False, False, 1)),
+    41: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-2, 1, False, False, 1)),
+    42: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 1e-3, 1, False, False, 1)),
+    43: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 5e-4, 1, False, False, 1)),
+
+    # Large sized memory to check for stability effect
+    50: launch_parm("ddpg",  1, ddpg_parm(int(1e6), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    51: launch_parm("ddpg",  1, ddpg_parm(int(1e6), 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    52: launch_parm("ddpg",  1, ddpg_parm(int(1e7), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    53: launch_parm("ddpg",  1, ddpg_parm(int(1e7), 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    55: launch_parm("ddpg",  1, ddpg_parm(int(1e8), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    56: launch_parm("ddpg",  1, ddpg_parm(int(1e8), 1024, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+    57: launch_parm("ddpg",  1, ddpg_parm(int(1e8), 4096, 0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 1)),
+
     # Check the effect of gradient clipping on the overall stability
-    60: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 64,   0.99, 1e-3, 1e-4, 1e-4, 1e-2, False,  True, 1)),
-    61: launch_parm("ddpg",  1, ddpg_parm(int(1e6), 512,  0.99, 1e-3, 1e-5, 1e-4, 1e-2, False,  True, 2)),
-    62: launch_parm("ddpg",  1, ddpg_parm(int(1e6), 512,  0.99, 1e-3, 1e-5, 1e-4, 0,    False,  True, 4)),
-#    63: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,     True,  True, 1)),
+    60: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, True, 1)),
+    61: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, True, 1)),
+    62: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, True, 1)),
+    63: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, True, 1)),
 
     # Check the effect of decreasing of the density of learning sessions over time
-    70: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    False, False,  2)),
-    71: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    False, False,  2)),
-    72: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,     True, False,  2)),
-    73: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,     True, False,  2)),
-    74: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    False, False,  5)),
-    75: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    False, False,  5)),
-    76: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,     True, False,  5)),
-    77: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,     True, False,  5)),
-    78: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    False, False, 20)),
-    79: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    False, False, 20)),
-    80: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,     True, False, 20)),
-    81: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,     True, False, 20)),
+    70: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False,  2)),
+    71: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False,  2)),
+    72: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, False,  2)),
+    73: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, False,  2)),
+    74: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False,  5)),
+    75: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False,  5)),
+    76: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, False,  5)),
+    77: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, False,  5)),
+    78: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1, False, False, 20)),
+    79: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1, False, False, 20)),
+    80: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    1,  True, False, 20)),
+    81: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    1,  True, False, 20)),
 
     # Check for general stability of outcomes over multiple runs with various random seed
-    90: launch_parm("ddpg", 25, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,    False, False, 1)),
-    91: launch_parm("ddpg", 25, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,    False, False, 1)),
-    92: launch_parm("ddpg", 25, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,     True, False, 1)),
-    93: launch_parm("ddpg", 25, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,     True, False, 1)),
+    90: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,   25, False, False, 1)),
+    91: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,   25, False, False, 1)),
+    92: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-4, 0,   25,  True, False, 1)),
+    93: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-3, 0,   25,  True, False, 1)),
 }
 
 

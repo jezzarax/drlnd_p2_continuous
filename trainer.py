@@ -18,11 +18,11 @@ launch_parm = namedtuple("launch_parm", ["algorithm", "times", "hparm"])
 env_parm = namedtuple("env_parm", ["state_size", "action_size", "brain_name", "agents_num"])
 
 
-ENVIRONMENT_BINARY = os.environ['DRLUD_P2_V2_ENV']
+ENVIRONMENT_BINARY = os.environ['DRLUD_P2_ENV']
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-path_prefix = "./hp_multi_agent_search_results/" if torch.cuda.is_available() else "./hp_single_agent_search_results/"
+path_prefix = "./hp_search_results/"
 
 
 def train(agent, environment, n_episodes=1000, max_t=2000, store_weights_to="checkpoint.pth"):

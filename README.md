@@ -1,88 +1,85 @@
-[//]: # (Image References)
+Solution to the first project of the deep reinforcement learning nanodegree at Udacity.
 
-[image1]: https://user-images.githubusercontent.com/10624937/43851024-320ba930-9aff-11e8-8493-ee547c6af349.gif "Trained Agent"
-[image2]: https://user-images.githubusercontent.com/10624937/43851646-d899bf20-9b00-11e8-858c-29b5c2c94ccc.png "Crawler"
+## Problem definition
 
-
-# Project 2: Continuous Control
-
-### Introduction
-
-For this project, you will work with the [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment.
-
-![Trained Agent][image1]
-
-In this environment, a double-jointed arm can move to target locations. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of your agent is to maintain its position at the target location for as many time steps as possible.
+In this environment, a double-jointed arm can move to target locations through a 3d space. A reward of +0.1 is provided for each step that the agent's hand is in the goal location. Thus, the goal of your agent is to maintain its position at the target location for as many time steps as possible.
 
 The observation space consists of 33 variables corresponding to position, rotation, velocity, and angular velocities of the arm. Each action is a vector with four numbers, corresponding to torque applicable to two joints. Every entry in the action vector should be a number between -1 and 1.
 
-### Distributed Training
+## Usage
 
-For this project, we will provide you with two separate versions of the Unity environment:
-- The first version contains a single agent.
-- The second version contains 20 identical agents, each with its own copy of the environment.  
+### Preparation
 
-The second version is useful for algorithms like [PPO](https://arxiv.org/pdf/1707.06347.pdf), [A3C](https://arxiv.org/pdf/1602.01783.pdf), and [D4PG](https://openreview.net/pdf?id=SyZipzbCb) that use multiple (non-interacting, parallel) copies of the same agent to distribute the task of gathering experience.  
+Please ensure you have [Pipenv](https://pipenv.readthedocs.io/en/latest/) installed. Clone the repository and use `pipenv --three install` to create yourself an environment to run the code in. Otherwise just install the packages mentioned in Pipfile.
 
-### Solving the Environment
+Due to the transitive dependency to tensorflow that comes from unity ml-agents and the [bug](https://github.com/pypa/pipenv/issues/1716) causing incompatibility to jupyter you might want to either drop the jupyter from the list of dependencies or run `pipenv --three install --skip-lock` to overcome it.
 
-Note that your project submission need only solve one of the two versions of the environment. 
+To activate a virtual environment with pipenv issue `pipenv shell` while in the root directory of the repository.
 
-#### Option 1: Solve the First Version
+After creating and entering the virtual environment you need to set a `DRLUD_P2_ENV` shell environment which must point to the binaries of the Unity environment. Example of for Mac OS version of binaries it might be 
+```
+DRLUD_P2_ENV=../deep-reinforcement-learning/p2_navigation/Reacher.app; export DRLUD_P2_ENV
+```
 
-The task is episodic, and in order to solve the environment,  your agent must get an average score of +30 over 100 consecutive episodes.
+Details of downloading and setting of the environment are described in Udacity nanodegree materials.
 
-#### Option 2: Solve the Second Version
+### Training (easy way)
 
-The barrier for solving the second version of the environment is slightly different, to take into account the presence of many agents.  In particular, your agents must get an average score of +30 (over 100 consecutive episodes, and over all agents).  Specifically,
-- After each episode, we add up the rewards that each agent received (without discounting), to get a score for each agent.  This yields 20 (potentially different) scores.  We then take the average of these 20 scores. 
-- This yields an **average score** for each episode (where the average is over all 20 agents).
+Just follow the [training notebook](Training.ipynb).
 
-The environment is considered solved, when the average (over 100 episodes) of those average scores is at least +30. 
+### Training (proper way)
 
-### Getting Started
+The executable part of code is built as a three-stage pipeline comprising of
+* training pipeline
+* analysis notebook
+* demo notebook
 
-1. Download the environment from one of the links below.  You need only select the environment that matches your operating system:
+The training pipeline was created with the idea of helping the researcher to keep track of his experimentation process as well as keeping the running results. The training process is spawned by executing the `trainer.py` script and is expected to be idempotent to the training results, i.e. if the result for a specific set of hyperparameters already exists and persisted, the trainer will skip launching a training session for this set of hyperparameters.
 
-    - **_Version 1: One (1) Agent_**
-        - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Linux.zip)
-        - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher.app.zip)
-        - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Windows_x86.zip)
-        - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Windows_x86_64.zip)
+The sets of hyperparameters for training are defined inside of `trainer.py` in the `simulation_hyperparameter_reference` dictionary which is supposed to be append-only in order to keep consistency of the training result data. Each of the hyperparameters sets will produce a file with a scores of number of runs of an agent which will be stored inside of `./hp_search_results` directory with an id referring to the key from the `simulation_hyperparameter_reference` dictionary. The neural networks weights for every agent training run will be stored in the same directory with the relevant hyperparameters key as well as random seed used.
 
-    - **_Version 2: Twenty (20) Agents_**
-        - Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux.zip)
-        - Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher.app.zip)
-        - Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86.zip)
-        - Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Windows_x86_64.zip)
-    
-    (_For Windows users_) Check out [this link](https://support.microsoft.com/en-us/help/827218/how-to-determine-whether-a-computer-is-running-a-32-bit-version-or-64) if you need help with determining if your computer is running a 32-bit version or 64-bit version of the Windows operating system.
+To train an agent with a new set of hyperparameters just add an item into `simulation_hyperparameter_reference` object. Here's an example of adding an item with id `25` after existing hyperparameter set with id `24`:
 
-    (_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/one_agent/Reacher_Linux_NoVis.zip) (version 1) or [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Reacher/Reacher_Linux_NoVis.zip) (version 2) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
+```
+simulation_hyperparameter_reference = {
+###
+###  Skipped some items here
+###
 
-2. Place the file in the DRLND GitHub repository, in the `p2_continuous-control/` folder, and unzip (or decompress) the file. 
+    24: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 1e-5, 0,    False, False, 1)),
+    25: launch_parm("ddpg",  1, ddpg_parm(int(1e5), 256,  0.99, 1e-3, 1e-4, 2e-5, 0,    False, False, 1)),
+}
+```
 
-### Instructions
+The set of hyperparameters is represented as an instance of a namedtuple `launch_parm` which has the following set of fields:
 
-Follow the instructions in `Continuous_Control.ipynb` to get started with training your own agent!  
+* algorithm
+* times
+* algorithm-specifgic set of hyperparameters
 
-### (Optional) Challenge: Crawler Environment
+The `algorithm` field defines an implementation of an agent, currently only `ddpg` algorithm is supported.
 
-After you have successfully completed the project, you might like to solve the more difficult **Crawler** environment.
+DDPG-related hyperparameters are passed using `ddpg_parm` namedtuple and contain the following fields:
 
-![Crawler][image2]
+* memory_size - number of experiences to persist
+* batch_size - numer of experiences to use during a learning session
+* gamma
+* tau
+* lr_actor
+* lr_critic
+* weight_decay
+* noise_enabled
+* gradient_clipping
+* learn_every - number of steps between learning sessions
 
-In this continuous control environment, the goal is to teach a creature with four legs to walk forward without falling.  
+The meaning and effects of other values for these field are discussed in the [hyperparameter search notebook](Training_hyperparameter_search_analysis.ipynb). 
 
-You can read more about this environment in the ML-Agents GitHub [here](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#crawler).  To solve this harder task, you'll need to download a new Unity environment.  (**Note**: Udacity students should not submit a project with this new environment.)
+## Implementation details
 
-You need only select the environment that matches your operating system:
-- Linux: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Linux.zip)
-- Mac OSX: [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler.app.zip)
-- Windows (32-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Windows_x86.zip)
-- Windows (64-bit): [click here](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Windows_x86_64.zip)
+Two neural network architectures are defined in the `models.py` file. 
+* Actor class implement a three-layer neural network that learns to project the state on to an action.
+* Critic class implements a three-layer neural network that learns to map state and an action into a Q-value.
 
-Then, place the file in the `p2_continuous-control/` folder in the DRLND GitHub repository, and unzip (or decompress) the file.  Next, open `Crawler.ipynb` and follow the instructions to learn how to use the Python API to control the agent.
+## Results 
 
-(_For AWS_) If you'd like to train the agent on AWS (and have not [enabled a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md)), then please use [this link](https://s3-us-west-1.amazonaws.com/udacity-drlnd/P2/Crawler/Crawler_Linux_NoVis.zip) to obtain the "headless" version of the environment.  You will **not** be able to watch the agent without enabling a virtual screen, but you will be able to train the agent.  (_To watch the agent, you should follow the instructions to [enable a virtual screen](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Training-on-Amazon-Web-Service.md), and then download the environment for the **Linux** operating system above._)
-
+Please check the [following notebook](Report.ipynb) for the best set of hyperparameters I managed to identify.

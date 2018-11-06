@@ -46,7 +46,7 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     """Critic (Value) Model."""
 
-    def __init__(self, config, seed, fc1_units=128, fc2_units=64):
+    def __init__(self, config, seed, fc1_units=400, fc2_units=300):
         """Initialize parameters and build model.
         Params
         ======
@@ -74,3 +74,18 @@ class Critic(nn.Module):
         x = torch.cat((xs, action), dim=1)
         x = F.relu(self.fc2(x))
         return self.fc3(x)
+
+
+class PPOModule(nn.Module):
+
+    def __init__(self, config, seed):
+        super(PPOModule, self).__init__()
+        self.seed = torch.manual_seed(seed)
+        self.fc1 = nn.Linear(config.state_size, config.fc1_units)
+        self.fc2 = nn.Linear(config.fc1_units + config.action_size, config.fc2_units)
+        self.fc3 = nn.Linear(config.fc2_units, config.action_size)
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        return F.sigmoid(self.fc3(x))
